@@ -1,0 +1,19 @@
+# Virtual Environment
+venv/
+env/
+
+# Django specific
+*.log
+*.pot
+*.pyc
+__pycache__/
+db.sqlite3
+
+# Media and static files (if managed separately)
+/media/
+
+# IDE and OS files
+.idea/
+.vscode/
+*.DS_Store
+    

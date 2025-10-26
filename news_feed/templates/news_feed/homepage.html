@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentic News</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .verified-badge {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -125px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        .category-link:hover {
+        background-color: #dbeafe !important;
+        color: #2563eb !important;
+        }
+        .news-tabs {
+        display: flex;
+        align-items: center;
+        gap: 14px;              /* space between chips */
+        padding: 8px 0;
+        flex-wrap: wrap;        /* allow wrap on smaller widths */
+        }
+        .news-tabs .tab {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 14px;
+        border-radius: 9999px;  /* pill */
+        font-size: 14px;
+        line-height: 1;
+        color: #374151;         /* slate-700 */
+        background: transparent;
+        text-decoration: none;
+        transition: background-color .15s ease, color .15s ease;
+        }
+        .news-tabs .tab:hover {
+        background: #eef2f7;    /* subtle hover */
+        color: #111827;         /* slate-900 */
+        }
+        .news-tabs .tab.active {
+        background: #e7f0ff;    /* active chip */
+        color: #1d4ed8;         /* blue-700 */
+        font-weight: 600;
+        }
+
+        
+
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <header class="bg-white shadow-sm p-4 sticky top-0 z-50" >
+        {% if user.is_authenticated %}
+    <div class="user-info">
+        <span>Welcome, {{ user.username }}!</span>
+        <button> 
+            <form action="{% url 'logout' %}" method="post" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="logout-button">Logout
+        </button>
+</form>
+ </button>
+    </div>
+        {% endif %}
+
+    <div class="container mx-auto flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:-ml-16">
+        <h1 class="text-3xl font-bold text-gray-900">Authentic News</h1>
+        <form action="{% url 'search_results' %}" method="get" class="w-full md:w-1/2 md:ml-16">
+                <div class="flex items-center rounded-full bg-gray-100 p-2 shadow-inner">
+                <input type="text" name="q" placeholder="Search news..." class="w-full bg-transparent px-4 py-1 text-gray-700 outline-none rounded-full">
+                <button type="submit" class="bg-blue-600 text-white rounded-full p-2 hover:bg-blue-700 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+                </div>
+        </form>
+    </div>
+    </header>
+
+    <nav class="relative z-30 bg-white shadow-sm p-3 mt-4">
+  <div class="container mx-auto flex flex-wrap justify-center gap-2 md:gap-4 text-sm font-medium text-gray-600 overflow-x-auto whitespace-nowrap">
+    
+
+    <a href="{% url 'homepage' %}"
+       class="px-4 py-2 rounded-full {% if category|lower == 'home' %}bg-blue-100 text-blue-600 active{% endif %} hover:bg-blue-100 hover:text-blue-600 transition">
+      Home
+    </a>
+   <a href="{% url 'categorized_news' 'for-you' %}"
+        class="px-4 py-2 rounded-full {% if category|lower == 'for you' %}bg-blue-100 text-blue-600 active{% endif %}">
+    For you
+    </a>
+    
+    <a href="{% url 'categorized_news' 'news-showcase' %}"
+        class="px-4 py-2 rounded-full {% if category|lower == 'news showcase' %}bg-blue-100 text-blue-600 active{% endif %}">
+    News Showcase
+    </a>
+    {% for cat in categories %}
+      <a href="{% url 'categorized_news' cat %} "
+         class="px-4 py-2 rounded-full {% if category|lower == cat|lower %}  bg-blue-100 text-blue-600 active{% endif %} hover:bg-blue-100 hover:text-blue-600 transition">
+        {{ cat }}
+      </a>
+    {% endfor %}
+  </div>
+</nav>
+
+
+    
+    <main class="container mx-auto p-4 md:p-6 mt-4">
+        {% if articles %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for article in articles %}
+                    <div class="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:scale-105">
+                       {% if article.image_url %}
+                        <img src="{{ article.image_url }}" alt="{{ article.title }}"
+                            class="w-full h-40 object-cover rounded-md"
+                            loading="lazy" referrerpolicy="no-referrer">
+                        {% else %}
+                        <div class="w-full h-40 rounded-md bg-gray-100 grid place-items-center text-gray-400">
+                            image
+                        </div>
+                        {% endif %}
+
+
+                        <div class="p-5">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-medium text-gray-500">{{ article.source_name }}</span>
+                                <div class="flex items-center space-x-2">
+                                    <div class="tooltip flex items-center text-green-600 text-sm font-semibold">
+                                        <span class="verified-badge">✔</span> <span>Verified</span>
+                                        <span class="tooltiptext">
+                                            This article has been verified by our multi-source AI engine.
+                                            It was cross-referenced with sources including: {{ article.verified_by_sources }}.
+                                        </span>
+                                    </div>
+                                    
+                                    {% if article.credibility_score >= 90 %}
+                                        <span class="bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded-full">
+                                            Score: {{ article.credibility_score }}
+                                        </span>
+                                    {% elif article.credibility_score >= 70 %}
+                                        <span class="bg-yellow-200 text-yellow-800 text-xs font-bold px-2 py-1 rounded-full">
+                                            Score: {{ article.credibility_score }}
+                                        </span>
+                                    {% else %}
+                                        <span class="bg-red-200 text-red-800 text-xs font-bold px-2 py-1 rounded-full">
+                                            Score: {{ article.credibility_score }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <h2 class="text-xl font-semibold text-gray-900 mb-2">{{ article.title }}</h2>
+                            <p class="text-gray-600 text-sm mb-4">{{ article.summary|truncatechars:150 }}</p>
+                            <div class="flex items-center justify-between">
+                                <a href="{{ article.source_url }}" target="_blank" class="text-blue-600 font-medium hover:underline transition-colors">
+                                    Read Full Article
+                                </a>
+                                <button onclick="showFeedbackModal('{{ article.id }}')" class="text-gray-500 hover:text-red-500 transition-colors text-sm">
+                                    Report Misinformation
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="bg-white rounded-lg shadow-md p-8 text-center text-gray-600">
+                <p class="text-lg font-medium">No verified articles found. Please check back later!</p>
+            </div>
+        {% endif %}
+    </main>
+
+    {% if show_subscription_popup %}
+        <div id="subscription-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl p-6 md:p-8 max-w-sm w-full text-center">
+                <h3 class="text-2xl font-bold mb-4">Stay Up-to-Date!</h3>
+                <p class="text-gray-700 mb-6">Only when you subscribe here will you get automatic news whenever updated.</p>
+                <form action="{% url 'subscribe' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                        Subscribe Now
+                    </button>
+                </form>
+                <button onclick="document.getElementById('subscription-modal').style.display='none'" class="mt-4 text-sm text-gray-500 hover:underline">
+                    No, thanks
+                </button>
+            </div>
+        </div>
+    {% endif %}
+
+    <div id="feedback-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 md:p-8 max-w-lg w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-900">Report Misinformation</h3>
+                <button onclick="document.getElementById('feedback-modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">&times;</button>
+            </div>
+            <form id="feedback-form" action="{% url 'report_misinformation' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="article_id" id="feedback-article-id">
+                <div class="mb-4">
+                    <label for="feedback_message" class="block text-sm font-medium text-gray-700 mb-1">Tell us why you think this is misinformation:</label>
+                    <textarea name="reason" id="feedback_message" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+                </div>
+                <div class="flex justify-end">
+                    <button type="submit" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition-colors">
+                        Submit Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Top-right Weather Widget -->
+    <!-- Weather Card -->
+<div style="position: absolute; top: 15px; right: 15px; z-index: 1000;" class="pointer-events-none flex justify-end items-center w-full mt-5 mb-6" id="weather-widget">
+  <div class="bg-gray-900 text-white rounded-2xl shadow-lg flex flex-row items-center px-2 py-3 pointer-events-auto inline-flex">
+    <div class="flex flex-col items-center mr-4">
+      {% if icon %}
+        <img src="https:{{ icon }}" alt="Weather Icon" class="w-9 h-9 mb-1">
+      {% endif %}
+      <div class="text-lg font-bold">{{ temperature }}&deg;C</div>
+      <div class="text-xs text-gray-300">{{ city }}</div>
+    </div>
+    <button id="expand-forecast" class="mx-2 focus:outline-none">
+      <!-- Arrow Icon SVG -->
+      <svg id="arrow-svg" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </button>
+    <div class="flex flex-col justify-center items-start">
+      <a href="https://www.google.com/search?q=weather+{{ city|urlencode }}" class="text-blue-400 hover:underline text-sm font-semibold" target="_blank" rel="noopener">Weather</a>
+    </div>
+  </div>
+  <!-- Hidden forecast, shown when expanded -->
+  <div id="forecast-details" class="bg-gray-900 text-white rounded-2xl shadow-lg flex flex-row items-center mt-2 px-4 py-3 hidden">
+    {% for day in forecast_days %}
+      <div class="flex flex-col items-center mx-2">
+        <div class="text-xs">{{ day.date }}</div>
+        <img src="https:{{ day.icon }}" alt="{{ day.date }} Icon" class="w-6 h-6 mb-1">
+        <div class="text-sm font-bold">{{ day.max_temp }}&deg;</div>
+        <div class="text-xs text-gray-400">{{ day.min_temp }}&deg;</div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+
+    <script>
+        function showFeedbackModal(articleId) {
+            document.getElementById('feedback-modal').classList.remove('hidden');
+            document.getElementById('feedback-article-id').value = articleId;
+        }
+        document.getElementById("expand-forecast").addEventListener("click", function() {
+            var details = document.getElementById("forecast-details");
+            var arrow = document.getElementById("arrow-svg");
+            if (details.classList.contains("hidden")) {
+                details.classList.remove("hidden");
+                arrow.style.transform = "rotate(90deg)";
+            } else {
+                details.classList.add("hidden");
+                arrow.style.transform = "rotate(0deg)";
+            }
+        });
+        document.addEventListener('mouseover', function(event) {
+            const categoryLink = event.target.closest('.category-link');
+            if (categoryLink) {
+                // Add hover styles
+                categoryLink.classList.add('hover:bg-blue-100');
+            }
+        });
+
+        document.addEventListener('mouseout', function(event) {
+            const categoryLink = event.target.closest('.category-link');
+            if (categoryLink) {
+                // Remove hover styles
+                categoryLink.classList.remove('hover:bg-blue-100');
+            }
+        });
+        document.getElementById('feedback-form').addEventListener('submit', function(event) {
+            event.preventDefault(); 
+            
+            const form = this;
+            const formData = new FormData(form);
+             
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('input[name="csrfmiddlewaretoken"]').value
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert("Thank you for your feedback! Your report has been submitted.");
+                    document.getElementById('feedback-modal').classList.add('hidden');
+                } else {
+                    alert("There was an error submitting your feedback.");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("There was an error submitting your feedback.");
+            });
+        });
+
+        const params = new URLSearchParams(window.location.search);
+        if (!params.has('lat') || !params.has('lon')) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    localStorage.setItem('lat', lat);
+                    localStorage.setItem('lon', lon);
+                    window.location.href = `${window.location.pathname}?lat=${lat}&lon=${lon}`;
+                }, function(error) {
+                    console.warn("Geolocation error:", error.message);
+                });
+            } else {
+                alert("Geolocation is not supported by your browser.");
+            }
+        }
+        (function () {
+            const qs = new URLSearchParams(window.location.search);
+            let lat = qs.get('lat');
+            let lon = qs.get('lon');
+
+            // If URL has coords, cache them; else restore from previous page
+            if (lat && lon) {
+            localStorage.setItem('lat', lat);
+            localStorage.setItem('lon', lon);
+            } else {
+            lat = localStorage.getItem('lat');
+            lon = localStorage.getItem('lon');
+            if (lat && lon) {
+                const u = new URL(window.location.href);
+                u.searchParams.set('lat', lat);
+                u.searchParams.set('lon', lon);
+                history.replaceState({}, '', u); // normalize URL without reload
+            }
+            }
+
+            function withCoords(href) {
+            try {
+                const u = new URL(href, window.location.origin);
+                if (lat && lon) {
+                u.searchParams.set('lat', lat);
+                u.searchParams.set('lon', lon);
+                }
+                return u.toString();
+            } catch { return href; }
+            }
+
+            // Ensure all category/nav links carry lat/lon
+            document.querySelectorAll('a[href^="/category/"], .news-tabs a, nav a')
+            .forEach(a => { a.href = withCoords(a.href); });
+
+            // Safety: enforce on any future clicks, too
+            document.addEventListener('click', function (e) {
+            const a = e.target.closest('a');
+            if (!a) return;
+            if (a.origin === window.location.origin) {
+                a.href = withCoords(a.href);
+            }
+            });
+        })();
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Weather Report</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            @import url('https://api.weatherapi.com/v1/current.json?key=4723e60bee924b14862145249250509&q=London&aqi=no');
+            body { font-family: 'Inter', sans-serif; }
+            
+        </style>
+    </head>
+    <body class="antialiased bg-gray-100 font-sans">
+    <div class="container mx-auto py-10 ">
+        <h1 class="text-4xl font-bold mb-2">Weather in {{ city }}</h1>
+        <h2 class="text-xl font-medium mb-8">{{ day_of_week }}, {{ date }}</h2>
+        <div class="weather-widget fixed top-2 right-2 z-40"></div>
+        <div class="bg-white p-8 rounded-xl shadow-lg max-w-md">
+            {% if temperature != 'N/A' %}
+                <p class="text-2xl mb-2">Temperature: <span class="font-semibold">{{ temperature }}°C</span></p>
+                <p class="text-lg mb-4">Condition: <span class="font-medium">{{ condition }}</span></p>
+                {% if icon %}
+                    <img src="https:{{ icon }}" alt="Weather Icon" class="w-16 h-16 mb-4">
+                {% endif %}
+            {% else %}
+                <p class="text-lg text-red-600">Could not fetch weather data. Please try again.</p>
+            {% endif %}
+        </div>
+    </div>
+    </div>
+   <script>
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has('lat') || !params.has('lon')) {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                window.location.href = `${window.location.pathname}?lat=${lat}&lon=${lon}`;
+            }, function(error) {
+                console.warn("Geolocation permission denied or unavailable.", error.message);
+            });
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+    }
+</script>
+
+
+    </html>    
+    

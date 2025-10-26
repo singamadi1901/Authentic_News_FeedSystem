@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentic News - Verified by Experts</title>
+    <!-- Add your CSS links here -->
+     {% load static %}
+    <link rel="stylesheet" href="{% static 'css/landing_styles.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="logo">Authentic News</div>
+        <div class="nav-links">
+            <a href="{% url 'login' %}" >Login</a>
+            <a href="{% url 'signup' %}" class="btn-signup">Sign Up</a>
+        </div>
+    </nav>
+
+    <div class="landing-container">
+        <header class="hero-section">
+            <span class="verified-badge">
+                <i class="fas fa-check-circle"></i> <!-- This is the simple icon tag -->
+                Verified News Only
+            </span>
+
+            <h1 style="color: #056ede;">Truth in Every Headline </h1>
+            <p class="subtitle">
+                Access curated news from multiple trusted sources. Every article is verified, 
+                scored for credibility, and filtered to eliminate fake news and duplicates.
+            </p>
+            <button> <a href="#subscribe" class="btn btn-secondary">Subscribe for Updates</a></button>
+        </header>
+            
+            <!-- Your three feature boxes from the image -->
+           
+           <section class="features">
+            <div class="feature-box">
+                <div class="feature-icon icon-verified">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                </div>
+                <h3>100% Verified</h3>
+                <p>Every article passes through our verification system.</p>
+            </div>
+
+            <div class="feature-box">
+                <div class="feature-icon icon-scores">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                        <polyline points="17 6 23 6 23 12"></polyline>
+                    </svg>
+                </div>
+                <h3>Credibility Scores</h3>
+                <p>Transparent scoring based on source reliability.</p>
+            </div>
+
+            <div class="feature-box">
+                <div class="feature-icon icon-fake-news">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                </div>
+                <h3>No Fake News</h3>
+                <p>Advanced filtering removes duplicates and false information.</p>
+            </div>
+
+
+        </section>
+    </div>
+
+    <!-- This is the section the "Subscribe" button will scroll to -->
+    <section id="subscribe" class="subscribe-section">
+        <div class="subscribe-content">
+            <h2>Never Miss an Update</h2>
+            <p>Subscribe to receive verified news headlines directly in your inbox. Powered by automated n8n workflows.</p>
+            <form class="subscribe-form" action="{% url 'subscribe' %}" method="post">
+                {% csrf_token %}
+                <input type="email" name="email" placeholder="Enter your email address" required>
+                <button type="submit" class="btn-subscribe">Subscribe</button>
+            </form>
+            <p class="subscribe-terms">By subscribing, you agree to receive email notifications about verified news updates. Unsubscribe anytime.</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2025 TruthSource. Powered by Django & n8n automation. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Authentic News</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/auth_styles.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="auth-container">
+        <h2>Sign in with your Email</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_username">Email or Username</label>
+                {{ form.username }}
+            </div>
+            <div class="form-group">
+                <label for="id_password">Password</label>
+                {{ form.password }}
+            </div>
+            {% if form.errors %}
+                <p class="error-message">Your username and password didn't match. Please try again.</p>
+            {% endif %}
+            <button type="submit" class="btn-submit">Login</button>
+        </form>
+        <div class="auth-switch">
+            <p>Don't have an account? <a href="{% url 'signup' %}">Sign up here</a></p>
+        </div>
+    </div>
+</body>
+</html>
